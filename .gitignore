@@ -1,6 +1,7 @@
 local_data/
 test.py
 test.ipynb
+MNIST/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
