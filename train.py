@@ -2,13 +2,13 @@ import numpy as np
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
-import torchvision
 from torchvision import datasets
 from torchvision import transforms
-from model.custom_resnet import CustomResNet18
+from model.custom_convNext import CustomConvNeXt
 from utils import *
+from torch.utils.data import DataLoader
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cpu"
 print(f"Using {device}")
 
 # fix random seeds for reproducibility
@@ -18,33 +18,29 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 
-# Define the transformation for ResNet-18
 transform = transforms.Compose([
-    transforms.Resize(256),              # Resize the shorter side of the image to 256 pixels
-    transforms.CenterCrop(224),          # Crop the center of the image to 224x224 pixels
-    transforms.ToTensor(),               # Convert the image to a PyTorch tensor
-    transforms.Lambda(lambda x: x.repeat(3, 1, 1)),  # Repeat the single channel 3 times to create an RGB image
-    transforms.Normalize(mean=[0.485, 0.456, 0.406],  # Normalize using the ImageNet mean and standard deviation
+    transforms.Resize((32, 32)),
+    transforms.ToTensor(),
+    transforms.Lambda(lambda x: x.repeat(3, 1, 1)),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
                          std=[0.229, 0.224, 0.225])
 ])
 
-# Get the MNIST train dataset 
+# Get the MNIST train dataset
 train_data = datasets.MNIST(root=".",
                             train=True,
                             download=True,
-                            transform=transform) # do we want to transform the data as we download it? 
+                            transform=transform)
 
 # Get the MNIST test dataset
 test_data = datasets.MNIST(root=".",
                            train=False,
                            download=True,
-                           transform=transform) 
+                           transform=transform)
 
 class_names = train_data.classes
-write_json(class_names, "classes.json")
 
 # Create train dataloader
-from torch.utils.data import DataLoader
 
 train_dataloader = DataLoader(dataset=train_data,
                               batch_size=256,
@@ -54,13 +50,13 @@ test_dataloader = DataLoader(dataset=test_data,
                              batch_size=256,
                              shuffle=False)
 
-model = CustomResNet18(num_classes=len(class_names))
+model = CustomConvNeXt(num_classes=len(class_names))
 model.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=0.00)
-early_stopping = EarlyStopping(patience=5, verbose=True, save_dir='weights/')
-num_epochs = 10
+early_stopping = EarlyStopping(patience=5, verbose=True, save_dir='data/weights/convNext')
+num_epochs = 1
 
 for epoch in range(num_epochs):
     train_loss, train_acc, train_preds, train_labels = train_step(
