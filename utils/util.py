@@ -4,6 +4,8 @@ import pandas as pd
 from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
+import numpy as np
+import random
 
 def reset_dir(dirname):
     dirname = Path(dirname)
@@ -48,6 +50,16 @@ def prepare_device(n_gpu_use):
     list_ids = list(range(n_gpu_use))
     return device, list_ids
 
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
 class MetricTracker:
     def __init__(self, *keys, writer=None):
         self.writer = writer
@@ -70,3 +82,17 @@ class MetricTracker:
 
     def result(self):
         return dict(self._data.average)
+
+def convert_2d_array_to_pe_file(array_2d: np.ndarray, original_size: int, output_file_path: str):
+    # Flatten the 2D array
+    flattened_array = array_2d.flatten()
+    
+    # Slice the flattened array to match the original size
+    byte_string = flattened_array[:original_size]
+    
+    # Convert to bytes
+    byte_string = byte_string.tobytes()
+    
+    # Write the byte string to a file
+    with open(output_file_path, 'wb') as file:
+        file.write(byte_string)
