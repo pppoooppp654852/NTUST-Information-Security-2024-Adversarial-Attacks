@@ -10,8 +10,10 @@ sys.path.append(str(root_dir))
 from model import CustomResNet18
 from utils import *
 
-INJECT_LOSS_THRESHOLD = 0.1
+INJECT_LOSS_THRESHOLD = 0.5
+INJECT_EARLY_STOP_THRESHOLD = 0.005
 
+set_seed(42)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f"Using {device}")
 
@@ -42,6 +44,18 @@ def save_image(tensor, path):
     image = image.squeeze(0)  # remove the batch dimension
     image = unloader(image)
     image.save(path)
+    
+def create_circle_mask(size, radius):
+    # Create a grid of coordinates
+    y, x = torch.meshgrid(torch.arange(size), torch.arange(size), indexing='ij')
+    center = size // 2
+    dist_from_center = torch.sqrt((x - center) ** 2 + (y - center) ** 2)
+    mask = dist_from_center <= radius
+    
+    return mask.float()
+
+# Generate the circular mask
+circle_mask = create_circle_mask(64, 16).to(device)
 
 for img_path in images_path:
     img = Image.open(str(img_path))
@@ -53,8 +67,10 @@ for img_path in images_path:
     # Define optimizer
     optimizer = torch.optim.Adam([img], lr=0.01)
 
-    loss_val = float('inf')
+    loss_val = 100
+    diff_loss = 10
     while loss_val > INJECT_LOSS_THRESHOLD:
+        
         # Forward pass
         logits = model(img)
         
@@ -65,18 +81,33 @@ for img_path in images_path:
         # Define a loss function that encourages misclassification
         loss_fn = torch.nn.CrossEntropyLoss()
         loss = loss_fn(logits, target_label)
+        
+        # Early stopping if the loss is not decreasing
+        diff_loss = (diff_loss * 4.0 + abs(loss.item() - loss_val)) / 5.0
+        if diff_loss < INJECT_EARLY_STOP_THRESHOLD:
+            print(f'Early stopping {diff_loss}')
+            break
+        
         loss_val = loss.item()
+        
+        print(loss_val, diff_loss)
+        
+
         
         # Calculate gradients
         optimizer.zero_grad()
         loss.backward()
+        
+        # Apply mask to gradients
+        img.grad.data *= circle_mask
+        
+        # update the image
         optimizer.step()
         
         # Ensure the tensor values remain within valid pixel range [0, 1]
         img.data = torch.clamp(img.data, 0, 1)
-        
-        # Zero out the gradients for the next iteration
         img.grad.zero_()
+        
         
     # Save the modified image
     modified_img_path = output_folder / img_path.name
