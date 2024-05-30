@@ -20,7 +20,7 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-image_folder = Path("data/injected")
+image_folder = Path("injected")
 images_path = [str(img_path) for img_path in image_folder.glob("*.jpg")]
 
 

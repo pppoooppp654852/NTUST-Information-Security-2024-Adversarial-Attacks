@@ -21,7 +21,7 @@ transform = transforms.Compose([
 ])
 
 image_folder = Path("data/normal")
-output_folder = Path("data/injected")
+output_folder = Path("injected")
 ensure_dir(str(output_folder))
 reset_dir(str(output_folder))
 
