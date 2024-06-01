@@ -71,7 +71,7 @@ def test_step(
     return test_loss, test_acc, torch.tensor(all_preds), torch.tensor(all_labels)
 
 class EarlyStopping:
-    def __init__(self, patience=5, verbose=False, delta=0, save_dir=None, save=True):
+    def __init__(self, patience, verbose=False, delta=0, save_dir=None, save=True):
         self.patience = patience
         self.verbose = verbose
         self.counter = 0

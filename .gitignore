@@ -4,6 +4,10 @@ test.ipynb
 MNIST/
 injected/
 converted/
+training_dataset/
+mask/
+logs/
+runs/
 
 # VSCode config
 .vscode/
