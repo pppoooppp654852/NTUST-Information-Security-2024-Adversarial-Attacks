@@ -56,7 +56,7 @@ model.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=0.00)
-early_stopping = EarlyStopping(patience=5, verbose=True, save_dir='data/weights')
+early_stopping = EarlyStopping(patience=5, verbose=True, save_dir='MNIST_data/weights')
 num_epochs = 2
 
 for epoch in range(num_epochs):

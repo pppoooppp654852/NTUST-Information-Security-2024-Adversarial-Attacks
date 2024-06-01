@@ -27,7 +27,7 @@ images_path = [str(img_path) for img_path in image_folder.glob("*.jpg")]
 classes = read_json("config/MNIST_classes.json")
 
 model = CustomResNet18(num_classes=len(classes))
-model.load_state_dict(torch.load("data/weights/checkpoint.pt"))
+model.load_state_dict(torch.load("MNIST_data/weights/checkpoint.pt"))
 model.to(device)
 model.eval()
 

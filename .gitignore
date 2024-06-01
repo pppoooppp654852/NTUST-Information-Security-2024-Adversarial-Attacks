@@ -3,6 +3,7 @@ test.py
 test.ipynb
 MNIST/
 injected/
+converted/
 
 # VSCode config
 .vscode/

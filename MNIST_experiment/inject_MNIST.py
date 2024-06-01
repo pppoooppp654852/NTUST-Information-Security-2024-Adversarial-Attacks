@@ -22,7 +22,7 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-image_folder = Path("data/normal")
+image_folder = Path("MNIST_data/normal")
 output_folder = Path("injected")
 ensure_dir(str(output_folder))
 reset_dir(str(output_folder))
@@ -33,7 +33,7 @@ images_path = random.sample(images_path, 10)
 classes = read_json("config/MNIST_classes.json")
 
 model = CustomResNet18(num_classes=len(classes))
-model.load_state_dict(torch.load("data/weights/checkpoint.pt"))
+model.load_state_dict(torch.load("MNIST_data/weights/checkpoint.pt"))
 model.to(device)
 model.eval()
 
