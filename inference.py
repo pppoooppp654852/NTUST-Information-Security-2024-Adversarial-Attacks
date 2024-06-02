@@ -5,17 +5,19 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from utils import *
 from model import CustomResNet18
+import warnings
+warnings.filterwarnings("ignore")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),
-    transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize([0.5], [0.5])
 ])
 
-target_folder = Path("data/target_data")
+target_folder = Path("data/injected_data")
+# target_folder = Path("data/target_data")
 
 classes = read_json("config/VIRUS_classes.json")
 
@@ -35,10 +37,11 @@ for file in target_folder.rglob('*.pt'):
     probilities = torch.softmax(logits, dim=1)
     conf, pred = torch.max(probilities, 1)
     predicted_label = classes[pred.item()]
+    print(f"File: {file.stem}\nLabel: {label} | Predicted: {predicted_label} | confidence: {conf.item():.4f}\n")
     
     # Display the image with the predicted label
     plt.figure(figsize=(5,5))
     plt.imshow(img_copy, cmap='gray')
-    plt.title(f"Label: {label} | Predicted: {predicted_label} | confidence: {conf.item():.4f}", fontsize=8)
+    plt.title(f"File: {file.stem}\nLabel: {label} | Predicted: {predicted_label} | confidence: {conf.item():.4f}", fontsize=8)
     plt.axis('off')
     plt.show()

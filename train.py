@@ -21,23 +21,23 @@ np.random.seed(SEED)
 
 transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),
-    transforms.Resize((224, 224)),
+    transforms.Resize((288, 288), transforms.InterpolationMode.NEAREST),
     transforms.ToTensor(),
     transforms.Normalize([0.5], [0.5])
 ])
 
 # Create dataset
-dataset = datasets.ImageFolder(root="data/training_dataset", transform=transform)
-train_dataset, val_dataset = split_dataset(dataset, train_ratio=0.8, seed=SEED)
-class_names = dataset.classes
+train_dataset = datasets.ImageFolder(root="data/dataset_splits/train", transform=transform)
+val_dataset = datasets.ImageFolder(root="data/dataset_splits/test", transform=transform)
+class_names = train_dataset.classes
 
 # Create dataloader
 train_dataloader = DataLoader(dataset=train_dataset,
-                              batch_size=32,
+                              batch_size=64,
                               shuffle=True)
 
 val_dataloader = DataLoader(dataset=val_dataset,
-                             batch_size=32,
+                             batch_size=64,
                              shuffle=False)
 
 # Create model
